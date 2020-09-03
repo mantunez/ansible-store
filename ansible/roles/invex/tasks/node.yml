@@ -1,0 +1,59 @@
+- name: Download nvm 
+  shell: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash'
+  become_user: www-data
+
+
+- name: Configure nvm
+  shell: 'export NVM_DIR="$HOME/.nvm"'
+  become_user: www-data
+
+- name: Configure nvm
+  shell: '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+  become_user: www-data
+  register: nvm_run
+  # ignore_errors: true
+  failed_when: nvm_run.rc != 1 and nvm_run.rc != 0 
+
+- name: Configure nvm
+  shell: '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'  
+  become_user: www-data
+  register: nvm_runconfig
+  # ignore_errors: true
+  failed_when: nvm_runconfig.rc != 1 and nvm_runconfig.rc != 0
+
+
+- name: Copy .bash_profile
+  copy:
+    src: var/www/.bash_profile
+    dest: /var/www/.bash_profile
+    owner: www-data
+    group: www-data
+    mode: '0644'
+    remote_src: no
+  
+- name: source /var/www/.bash_profile
+  shell: 'source /var/www/.bash_profile'
+  become_user: www-data
+  args:
+     executable: /bin/bash
+
+- name: Chequeo si node esta instalado
+  shell: 'node --version'
+  register: node_output
+  become_user: www-data
+  ignore_errors: true
+
+- name: asdasd
+  debug:
+    msg: "{{node_output.stdout}}"
+  
+
+#- name: Instalo node solo si no esta instalado
+#  command: 'nvm install node'
+#  become: yes
+#  become_user: www-data
+#  when: node_output.stdout == ''
+
+## REVISAR QUE CORRA CON USER WWW-DATA
+
+## REVISAR VARIABLES DE ENTORNO!!!!!!!!!!!!!!!!!!!!

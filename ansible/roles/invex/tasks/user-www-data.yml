@@ -1,0 +1,75 @@
+- name: Borro todo lo relacionado a www-data en /etc/passwd
+  lineinfile:
+    path: /etc/passwd
+    state: absent
+    regexp: '^www-data'
+
+- name: Agrego www-data al /etc/passwd
+  lineinfile:
+    path: /etc/passwd
+    line: "www-data:x:33:33:www-data:/var/www:/bin/bash"
+    create: yes
+
+- name: Add a line to a file if the file does not exist
+  lineinfile:
+    path: /home/ubuntu/.bash_aliases
+    line: "{{item}}" 
+    create: yes
+  with_items:
+    - alias suwww-data="sudo su - www-data"
+    - alias suroot="sudo su - "
+
+- name: Add a line to a file if the file does not exist
+  lineinfile:
+    path: /root/.bash_aliases
+    line: alias suwww-data="sudo su - www-data"
+    create: yes
+
+- name: source bashrc
+  sudo: no   
+  shell: source /root/.bash_aliases
+  args:
+     executable: /bin/bash
+
+
+- name: Crear directorio .ssh para jenkins
+  file:
+    path: /var/www/.ssh
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Guardo en public_key si existe o no la llave
+  stat:
+    path: '/var/www/.ssh/{{hostname}}.pub'
+  register: public_key
+
+- name: Crear llave para www-data solamente si no existe
+  shell: ssh-keygen -t rsa -b 4096 -C "`whoami`@`hostname`" -P "" -f "`hostname`"
+  become_user: www-data
+  args:
+    chdir: /var/www/.ssh
+  when: not public_key.stat.exists
+
+- name: Guardo la key en una variable
+  shell: "cat /var/www/.ssh/{{hostname}}.pub"
+  register: content_key
+
+
+- name: Agrego la public key en el authorized keys
+  copy:
+    content: "{{content_key.stdout}}"
+    dest: '/var/www/.ssh/authorized_keys'
+
+- name: Copy --> /var/www/.ssh/config
+  template:
+    src: var/www/.ssh/config
+    dest: /var/www/.ssh/config
+    owner: www-data
+    group: www-data
+    mode: '0664'
+
+- name: Agregar esta llave a git ;)
+  debug:
+    msg: "{{content_key.stdout}}"

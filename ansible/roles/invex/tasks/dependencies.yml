@@ -1,0 +1,73 @@
+#- name: Nginx repository 
+#  apt_repository:
+#    repo: "{{item}}"
+#    state: present
+#    filename: nginx
+#  with_items:
+#    - deb https://nginx.org/packages/ubuntu/ bionic nginx
+#    - deb-src https://nginx.org/packages/ubuntu/ bionic nginx
+
+###############
+#- name: Add key for nginx
+#  shell: 'wget https://nginx.org/keys/nginx_signing.key -O - | sudo apt-key add -'
+
+- name: Add an Apt signing key, uses whichever key is at the URL
+  apt_key:
+    url: 'https://nginx.org/keys/nginx_signing.key'
+    state: present
+########################
+
+
+#- name: Key nginx 
+#  shell: 'apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62'
+
+- name: Run the equivalent of "apt-get update" 
+  apt:
+    update_cache: yes
+
+
+- name: Install nginx 1.18
+  apt:
+    name: nginx
+    state: present
+
+- name: Repositorio php 
+  apt_repository:
+    repo: ppa:ondrej/php
+
+- name: Install mysql & php 7.3 
+  apt:
+    name:
+      - mysql-client-5.7 
+      - php-apcu
+      - php-apcu-bc
+      - php-common 
+      - php-psr-log
+      - php-ssh2
+      - php7.3
+      - php7.3-cli
+      - php7.3-common 
+      - php7.3-curl
+      - php7.3-fpm
+      - php7.3-gd
+      - php7.3-gmp
+      - php7.3-intl
+      - php7.3-json
+      - php7.3-mbstring
+      - php7.3-mysql 
+      - php7.3-opcache
+      - php7.3-readline 
+      - php7.3-soap
+      - php7.3-xml
+      - php7.3-zip
+      - php7.3-gd
+      - wget 
+      - php-cli
+      - php-zip
+      - zip
+      - unzip
+      - curl
+    state: present
+  become_user: root
+
+

@@ -1,0 +1,63 @@
+## awscli
+
+- name: Chequear si esta instalado awscli
+  shell: 'aws --version'
+  register: awscli
+  ignore_errors: yes
+
+- name: Descarga si no esta instalado
+  get_url:
+    url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" 
+    dest: /tmp/awscliv2.zip
+  when: awscli .stdout == ""
+
+- name: Unzip de awscli
+  unarchive:
+    src: /tmp/awscliv2.zip
+    dest: /tmp
+    remote_src: yes
+  when: awscli .stdout == ""
+
+- name: Instalar awscli 
+  shell: 'sudo ./aws/install'
+  args:
+    chdir: /tmp
+  when: awscli .stdout == ""
+
+## Yarn
+- name: Instalar yarn 
+  shell: 'curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -'
+
+- name: Yarn repository 
+  apt_repository:
+    repo: "{{item}}"
+    state: present
+    filename: yarn.list
+  with_items:
+    - 'deb https://dl.yarnpkg.com/debian/ stable main'
+
+- name: Run the equivalent of "apt-get update" 
+  apt:
+    update_cache: yes
+
+- name: Install yarn 
+  apt:
+    name: yarn
+    state: latest
+    install_recommends: no
+
+## Composer
+
+#- name: Download composer 
+#  get_url:
+#    url: 'https://getcomposer.org/installer |php'
+#    dest: /tmp 
+
+- name: Download composer
+  shell: curl -sS https://getcomposer.org/installer |php
+
+- name: Move composer to /usr/local/bin
+  shell: 'mv composer.phar /usr/local/bin/composer'
+
+
+## Falta nvm y node 

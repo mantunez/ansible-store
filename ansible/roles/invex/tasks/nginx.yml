@@ -1,0 +1,42 @@
+- name: Copy --> /etc/php/7.3/fpm/pool.d/www.conf
+  copy:
+    src: etc/php/7.3/fpm/pool.d/www.conf
+    dest: /etc/php/7.3/fpm/pool.d/www.conf
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: no
+
+- name: Copy --> /etc/nginx/sites-available/
+  template:
+    src: etc/nginx/sites-available/{{store}}-{{env}}.aper.cloud.conf
+    dest: /etc/nginx/sites-available/{{store}}-{{env}}.aper.cloud.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+
+- name: Check if file /etc/nginx/sites-available/ exist
+  stat:
+    path: /etc/nginx/sites-available/{{store}}-{{env}}.aper.cloud.conf
+  register: sites_available_file
+
+- name: Symbolic link to sites available
+  file:
+    src: /etc/nginx/sites-available/{{store}}-{{env}}.aper.cloud.conf
+    dest: /etc/nginx/sites-enabled/{{store}}-{{env}}.aper.cloud.conf
+    owner: root
+    group: root
+    state: link
+  when: sites_available_file.stat.exists
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: Restart php-fpm
+  service:
+    name: php7.3-fpm
+    state: restarted
+

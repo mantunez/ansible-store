@@ -1,0 +1,7 @@
+- name: Copy the keys to the server
+  template:
+    src: .ssh/authorized_keys
+    dest: /home/ubuntu/.ssh/authorized_keys
+    owner: ubuntu
+    group: ubuntu
+    mode: '0600'

@@ -1,0 +1,14 @@
+- hosts: all
+  # become: true
+  tasks:
+    - name: Ejecuta el rol invex
+      include_role:
+        name: invex
+      when: task is not defined
+
+## If you want to exec only a task. You've to take into account that can broke by other dependencies.
+    - name: Ejecuta una sola tarea si es necesario
+      include_role:
+        name: invex
+        tasks_from: "{{ task }}"
+      when: task is defined

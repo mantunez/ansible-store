@@ -1,0 +1,11 @@
+## Descargar valyrio
+
+- name: Download valyrio
+  shell: 'aws s3 cp s3://valyrio/www /var/www/{{store}}-{{env}}.aper.cloud/www --recursive '
+
+- name: Download valyrio bucket
+  aws_s3:
+    mode: get
+    bucket: "{{valyrio}}"
+    object: "{{www}}"
+    dest: "/var/www/{{store}}-{{env}}.aper.cloud/www"
